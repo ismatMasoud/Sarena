@@ -1,0 +1,26 @@
+/* Custom radio button for Sarena */
+
+.radio-button {
+    -fx-font-size: 18px;
+    -fx-text-fill: #3b2a1a;
+    -fx-font-weight: bold;
+}
+
+/* Cirkel */
+.radio-button .radio {
+    -fx-background-color: transparent;
+    -fx-border-color: #6b4a2b;
+    -fx-border-width: 4px;
+    -fx-border-radius: 50%;
+    -fx-padding: 7px;
+}
+
+/* Geselecteerd bolletje */
+.radio-button:selected .radio {
+    -fx-background-color: #6b4a2b;
+}
+
+/* Hover effect */
+.radio-button:hover .radio {
+    -fx-border-color: #9c6b3f;
+}
