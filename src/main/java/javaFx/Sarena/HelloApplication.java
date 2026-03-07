@@ -11,8 +11,6 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) {
 
-
-
         StartView startView = new StartView();
         new StartPresenter(startView, stage);
 

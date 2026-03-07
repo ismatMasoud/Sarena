@@ -1,4 +1,4 @@
-package javaFx.Sarena.module;
+package javaFx.Sarena.model;
 
 public enum StartMode {
     PLAYER_STARTS,
