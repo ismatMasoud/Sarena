@@ -1,62 +1,167 @@
 package javaFx.Sarena.views.game;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Font;
 
 public class GameView extends AnchorPane {
-    private ImageView background;
-    private Button leaderboardButton;
-    private Button exitButton;
-    private Button aboutButton;
-    private Button NewGameButton;
-    private Button RulesGameButton;
-    private Button UndoGameButton;
 
+    private ImageView background;
+
+    private Button[] cellButtons;
+
+    private Label lblCurrentPlayer;
+    private Label lblMessage;
+    private Label lblTurnCount;
+
+    private Button btnRules;
+    private Button btnUndo;
+    private Button btnNewGame;
+    private Button btnExit;
 
     public GameView() {
-        initializeNodes();
+        initialiseNodes();
         layoutNodes();
     }
 
-    private void initializeNodes() {
+    private void initialiseNodes() {
 
-
-        background = new javafx.scene.image.ImageView(new Image(getClass().getResource("/images/background.png").toExternalForm()));
-        background.setFitWidth(650);
-        background.setFitHeight(780);
+        // volledige achtergrond van je game screen
+        background = new ImageView(new Image(
+                getClass().getResource("/images/GameView.png").toExternalForm()
+        ));
+        background.setFitWidth(900);
+        background.setFitHeight(700);
         background.setPreserveRatio(false);
 
+        lblCurrentPlayer = new Label("Current Player:");
+        lblCurrentPlayer.setFont(new Font("Arial", 16));
 
-        javafx.scene.image.ImageView leaderImg = new javafx.scene.image.ImageView(new Image(getClass().getResource("/images/leaderboardbutton.png").toExternalForm()));
-        leaderImg.setFitWidth(320);
-        leaderImg.setFitHeight(170);
+        lblMessage = new Label("Select a start cell");
+        lblMessage.setFont(new Font("Arial", 16));
 
-        leaderboardButton = new Button();
-        leaderboardButton.setGraphic(leaderImg);
-        leaderboardButton.setStyle("-fx-background-color: transparent;");
+        lblTurnCount = new Label("Turns: 0");
+        lblTurnCount.setFont(new Font("Arial", 16));
 
-        javafx.scene.image.ImageView aboutImg = new javafx.scene.image.ImageView(new Image(getClass().getResource("/images/aboutbutton.png").toExternalForm()));
-        aboutImg.setFitWidth(280);
-        aboutImg.setFitHeight(180);
+        // ===== knoppen met afbeeldingen =====
+        btnRules = makeImageButton("/images/RulesButton.png", 150, 120);
+        btnUndo = makeImageButton("/images/UndoButton.png", 150, 120);
+        btnNewGame = makeImageButton("/images/NewGameButton.png", 150, 100);
+        btnExit = makeImageButton("/images/exitbutton.png", 170, 150);
 
-        aboutButton = new Button();
-        aboutButton.setGraphic(aboutImg);
-        aboutButton.setStyle("-fx-background-color: transparent;");
+        // ===== 36 cell buttons =====
+        cellButtons = new Button[36];
 
-        javafx.scene.image.ImageView exitImg = new javafx.scene.image.ImageView(new Image(getClass().getResource("/images/exitbutton.png").toExternalForm()));
-        exitImg.setFitWidth(180);
-        exitImg.setFitHeight(170);
+        for (int i = 0; i < cellButtons.length; i++) {
+            Button button = new Button();
 
-        exitButton = new Button();
-        exitButton.setGraphic(exitImg);
-        exitButton.setStyle("-fx-background-color: transparent;");
+            button.setPrefSize(42, 42);
 
+            // transparant zodat alleen piece image zichtbaar is
+            button.setStyle("-fx-background-color: transparent;");
+
+            cellButtons[i] = button;
+        }
+    }
+
+    private Button makeImageButton(String imagePath, double width, double height) {
+        ImageView img = new ImageView(new Image(
+                getClass().getResource(imagePath).toExternalForm()
+        ));
+        img.setFitWidth(width);
+        img.setFitHeight(height);
+
+        Button button = new Button();
+        button.setGraphic(img);
+        button.setStyle("-fx-background-color: transparent;");
+        return button;
     }
 
     private void layoutNodes() {
+        getChildren().add(background);
 
+        // labels
+        getChildren().addAll(lblCurrentPlayer, lblMessage, lblTurnCount);
+
+        AnchorPane.setTopAnchor(lblCurrentPlayer, 25.0);
+        AnchorPane.setLeftAnchor(lblCurrentPlayer, 40.0);
+
+        AnchorPane.setTopAnchor(lblMessage, 55.0);
+        AnchorPane.setLeftAnchor(lblMessage, 40.0);
+
+        AnchorPane.setTopAnchor(lblTurnCount, 85.0);
+        AnchorPane.setLeftAnchor(lblTurnCount, 40.0);
+
+        // onderaan knoppen
+        getChildren().addAll(btnUndo, btnRules, btnNewGame, btnExit);
+
+        AnchorPane.setBottomAnchor(btnUndo, 20.0);
+        AnchorPane.setLeftAnchor(btnUndo, 180.0);
+
+        AnchorPane.setBottomAnchor(btnRules, 20.0);
+        AnchorPane.setLeftAnchor(btnRules, 290.0);
+
+        AnchorPane.setBottomAnchor(btnNewGame, 20.0);
+        AnchorPane.setLeftAnchor(btnNewGame, 400.0);
+
+        AnchorPane.setBottomAnchor(btnExit, 20.0);
+        AnchorPane.setLeftAnchor(btnExit, 510.0);
+
+        // 36 cell buttons
+        //
+        // Dit zijn nog voorbeeldposities.
+        // Jij moet ze later exact op de cirkels van jouw GameView.png zetten.
+        double startX = 90;
+        double startY = 110;
+        double gapX = 105;
+        double gapY = 78;
+
+        int index = 0;
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 6; col++) {
+                Button button = cellButtons[index];
+                getChildren().add(button);
+
+                AnchorPane.setTopAnchor(button, startY + row * gapY);
+                AnchorPane.setLeftAnchor(button, startX + col * gapX);
+
+                index++;
+            }
+        }
+    }
+
+    public Button[] getCellButtons() {
+        return cellButtons;
+    }
+
+    public Label getLblCurrentPlayer() {
+        return lblCurrentPlayer;
+    }
+
+    public Label getLblMessage() {
+        return lblMessage;
+    }
+
+    public Label getLblTurnCount() {
+        return lblTurnCount;
+    }
+
+    public Button getBtnRules() {
+        return btnRules;
+    }
+
+    public Button getBtnUndo() {
+        return btnUndo;
+    }
+
+    public Button getBtnNewGame() {
+        return btnNewGame;
+    }
+
+    public Button getBtnExit() {
+        return btnExit;
     }
 }
-

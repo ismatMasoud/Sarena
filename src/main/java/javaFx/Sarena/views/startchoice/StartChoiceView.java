@@ -1,5 +1,6 @@
 package javaFx.Sarena.views.startchoice;
 
+import javaFx.Sarena.model.StartMode;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
@@ -13,9 +14,8 @@ public class StartChoiceView extends AnchorPane {
 
     private ToggleGroup group;
     private RadioButton rbPlayer;
-    private RadioButton rbOpponent;
+    private RadioButton rbComputer;
     private RadioButton rbRandom;
-
     private Button backButton;
     private Button continueButton;
 
@@ -38,8 +38,8 @@ public class StartChoiceView extends AnchorPane {
         rbPlayer = new RadioButton("Player starts");
         rbPlayer.setToggleGroup(group);
 
-        rbOpponent = new RadioButton("Computer / Player 2 starts");
-        rbOpponent.setToggleGroup(group);
+        rbComputer = new RadioButton("Computer / Player 2 starts");
+        rbComputer.setToggleGroup(group);
 
         rbRandom = new RadioButton("Random");
         rbRandom.setToggleGroup(group);
@@ -49,7 +49,7 @@ public class StartChoiceView extends AnchorPane {
 
         // Grotere klikzone (makkelijk klikken)
         rbPlayer.setPrefSize(360, 45);
-        rbOpponent.setPrefSize(360, 45);
+        rbComputer.setPrefSize(360, 45);
         rbRandom.setPrefSize(360, 45);
 
         // Buttons
@@ -75,7 +75,7 @@ public class StartChoiceView extends AnchorPane {
     }
 
     private void layoutNodes() {
-        this.getChildren().addAll(background, rbPlayer, rbOpponent, rbRandom, backButton, continueButton);
+        this.getChildren().addAll(background, rbPlayer, rbComputer, rbRandom, backButton, continueButton);
 
         AnchorPane.setTopAnchor(background, 0.0);
         AnchorPane.setLeftAnchor(background, 0.0);
@@ -84,8 +84,8 @@ public class StartChoiceView extends AnchorPane {
         AnchorPane.setTopAnchor(rbPlayer, 320.0);
         AnchorPane.setLeftAnchor(rbPlayer, 140.0);
 
-        AnchorPane.setTopAnchor(rbOpponent, 375.0);
-        AnchorPane.setLeftAnchor(rbOpponent, 140.0);
+        AnchorPane.setTopAnchor(rbComputer, 375.0);
+        AnchorPane.setLeftAnchor(rbComputer, 140.0);
 
         AnchorPane.setTopAnchor(rbRandom, 430.0);
         AnchorPane.setLeftAnchor(rbRandom, 140.0);
@@ -100,5 +100,16 @@ public class StartChoiceView extends AnchorPane {
     public Button getBackButton() { return backButton; }
     public Button getContinueButton() { return continueButton; }
 
+    public StartMode getSelectedStartMode() {
+        if (rbPlayer.isSelected()) {
+            return StartMode.PLAYER_STARTS;
+        } else if (rbComputer.isSelected()) {
+            return StartMode.COMPUTER_STARTS;
+        } else if (rbRandom.isSelected()) {
+            return StartMode.RANDOM;
+        }
+
+        return null;
+    }
 
 }
