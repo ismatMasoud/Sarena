@@ -4,17 +4,37 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import javaFx.Sarena.model.PieceColor;
+import javaFx.Sarena.model.Tower;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
 public class GameView extends AnchorPane {
 
+    private static final double BACKGROUND_WIDTH = 900;
+    private static final double BACKGROUND_HEIGHT = 700;
+
+    private static final double CELL_SIZE = 48;
+    private static final double START_X = 120;
+    private static final double START_Y = 90;
+    private static final double GAP_X = 95;
+    private static final double GAP_Y = 68;
+
+    private static final double PIECE_WIDTH = 32;
+    private static final double PIECE_HEIGHT = 32;
+    private static final double STACK_OFFSET = 6;
+
     private ImageView background;
+
+    private VBox infoBox;
+    private HBox buttonBar;
 
     private Button[] cellButtons;
 
@@ -35,47 +55,45 @@ public class GameView extends AnchorPane {
     }
 
     private void initialiseNodes() {
-
-        // ===== ACHTERGROND =====
-        var bgUrl = getClass().getResource("/images/GameView.png");
-        if (bgUrl == null) {
-            throw new IllegalArgumentException("Image not found: /images/GameView.png");
-        }
-
-        background = new ImageView(new Image(bgUrl.toExternalForm()));
-        background.setFitWidth(900);
-        background.setFitHeight(700);
+        background = new ImageView(loadImage("/images/GameView.png"));
+        background.setFitWidth(BACKGROUND_WIDTH);
+        background.setFitHeight(BACKGROUND_HEIGHT);
         background.setPreserveRatio(false);
 
-        // ===== LABELS =====
         lblCurrentPlayer = new Label("Current Player:");
         lblCurrentPlayer.setFont(new Font("Arial", 16));
+        lblCurrentPlayer.setStyle("-fx-text-fill: white;");
 
         lblMessage = new Label("Select a start cell");
         lblMessage.setFont(new Font("Arial", 16));
+        lblMessage.setStyle("-fx-text-fill: white;");
 
         lblTurnCount = new Label("Turns: 0");
         lblTurnCount.setFont(new Font("Arial", 16));
+        lblTurnCount.setStyle("-fx-text-fill: white;");
 
-        // ===== PIECE IMAGES LADEN =====
+        infoBox = new VBox(8);
+        infoBox.getChildren().addAll(lblCurrentPlayer, lblMessage, lblTurnCount);
+
         pieceImages = new EnumMap<>(PieceColor.class);
         pieceImages.put(PieceColor.RED, loadImage("/images/RedPiece.png"));
         pieceImages.put(PieceColor.BLACK, loadImage("/images/BlackPiece.png"));
         pieceImages.put(PieceColor.WHITE, loadImage("/images/WhitePiece.png"));
         pieceImages.put(PieceColor.YELLOW, loadImage("/images/YellowPiece.png"));
 
-        // ===== KNOPPEN MET AFBEELDINGEN =====
         btnRules = makeImageButton("/images/RulesButton.png", 150, 120);
         btnUndo = makeImageButton("/images/UndoButton.png", 150, 120);
         btnNewGame = makeImageButton("/images/NewGameButton.png", 150, 100);
         btnExit = makeImageButton("/images/exitbutton.png", 170, 150);
 
-        // ===== 36 CELL BUTTONS =====
-        cellButtons = new Button[36];
+        buttonBar = new HBox(15);
+        buttonBar.setAlignment(Pos.CENTER);
+        buttonBar.getChildren().addAll(btnUndo, btnRules, btnNewGame, btnExit);
 
+        cellButtons = new Button[36];
         for (int i = 0; i < cellButtons.length; i++) {
             Button button = new Button();
-            button.setPrefSize(42, 42);
+            button.setPrefSize(CELL_SIZE, CELL_SIZE);
             button.setStyle("-fx-background-color: transparent;");
             button.setText("");
             cellButtons[i] = button;
@@ -91,53 +109,29 @@ public class GameView extends AnchorPane {
     }
 
     private Button makeImageButton(String imagePath, double width, double height) {
-        Image image = loadImage(imagePath);
-
-        ImageView img = new ImageView(image);
-        img.setFitWidth(width);
-        img.setFitHeight(height);
+        ImageView imageView = new ImageView(loadImage(imagePath));
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
 
         Button button = new Button();
-        button.setGraphic(img);
+        button.setGraphic(imageView);
         button.setStyle("-fx-background-color: transparent;");
         return button;
     }
 
     private void layoutNodes() {
         getChildren().add(background);
+        getChildren().add(infoBox);
+        getChildren().add(buttonBar);
 
-        // ===== LABELS =====
-        getChildren().addAll(lblCurrentPlayer, lblMessage, lblTurnCount);
+        AnchorPane.setTopAnchor(background, 0.0);
+        AnchorPane.setLeftAnchor(background, 0.0);
 
-        AnchorPane.setTopAnchor(lblCurrentPlayer, 25.0);
-        AnchorPane.setLeftAnchor(lblCurrentPlayer, 40.0);
+        AnchorPane.setTopAnchor(infoBox, 20.0);
+        AnchorPane.setLeftAnchor(infoBox, 30.0);
 
-        AnchorPane.setTopAnchor(lblMessage, 55.0);
-        AnchorPane.setLeftAnchor(lblMessage, 40.0);
-
-        AnchorPane.setTopAnchor(lblTurnCount, 85.0);
-        AnchorPane.setLeftAnchor(lblTurnCount, 40.0);
-
-        // ===== ONDERAAN KNOPPEN =====
-        getChildren().addAll(btnUndo, btnRules, btnNewGame, btnExit);
-
-        AnchorPane.setBottomAnchor(btnUndo, 20.0);
-        AnchorPane.setLeftAnchor(btnUndo, 180.0);
-
-        AnchorPane.setBottomAnchor(btnRules, 20.0);
-        AnchorPane.setLeftAnchor(btnRules, 290.0);
-
-        AnchorPane.setBottomAnchor(btnNewGame, 20.0);
-        AnchorPane.setLeftAnchor(btnNewGame, 400.0);
-
-        AnchorPane.setBottomAnchor(btnExit, 20.0);
-        AnchorPane.setLeftAnchor(btnExit, 510.0);
-
-        // ===== CELL BUTTONS =====
-        double startX = 90;
-        double startY = 110;
-        double gapX = 105;
-        double gapY = 78;
+        AnchorPane.setBottomAnchor(buttonBar, 20.0);
+        AnchorPane.setLeftAnchor(buttonBar, 170.0);
 
         int index = 0;
         for (int row = 0; row < 6; row++) {
@@ -145,8 +139,8 @@ public class GameView extends AnchorPane {
                 Button button = cellButtons[index];
                 getChildren().add(button);
 
-                AnchorPane.setTopAnchor(button, startY + row * gapY);
-                AnchorPane.setLeftAnchor(button, startX + col * gapX);
+                AnchorPane.setTopAnchor(button, START_Y + row * GAP_Y);
+                AnchorPane.setLeftAnchor(button, START_X + col * GAP_X);
 
                 index++;
             }
@@ -159,23 +153,37 @@ public class GameView extends AnchorPane {
         button.setText("");
     }
 
-    public void showPiece(int index, PieceColor color, int height) {
+    public void showTower(int index, Tower tower) {
         Button button = cellButtons[index];
 
-        Image image = pieceImages.get(color);
-        if (image == null) {
+        if (tower == null || tower.isEmpty()) {
             button.setGraphic(null);
-            button.setText("?");
+            button.setText("");
             return;
         }
 
-        ImageView pieceView = new ImageView(image);
-        pieceView.setFitWidth(28);
-        pieceView.setFitHeight(28);
+        Pane stackPane = new Pane();
+        stackPane.setPrefSize(30, 30);
 
-        button.setGraphic(pieceView);
-        button.setText(String.valueOf(height));
-        button.setContentDisplay(ContentDisplay.BOTTOM);
+        int level = 0;
+
+        for (PieceColor color : tower.getPieces()) {
+            Image image = pieceImages.get(color);
+
+            if (image != null) {
+                ImageView pieceView = new ImageView(image);
+                pieceView.setFitWidth(PIECE_WIDTH);
+                pieceView.setFitHeight(PIECE_HEIGHT);
+                pieceView.setLayoutX(0);
+                pieceView.setLayoutY(-level * STACK_OFFSET);
+
+                stackPane.getChildren().add(pieceView);
+                level++;
+            }
+        }
+
+        button.setGraphic(stackPane);
+        button.setText("");
     }
 
     public Button[] getCellButtons() {
@@ -209,4 +217,5 @@ public class GameView extends AnchorPane {
     public Button getBtnExit() {
         return btnExit;
     }
+
 }

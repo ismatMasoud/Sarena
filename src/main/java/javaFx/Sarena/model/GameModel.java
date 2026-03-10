@@ -14,6 +14,10 @@ public class GameModel {
     private long startMillis;
 
     public void startNewGame(String playerName, StartMode startMode) {
+        if (playerName == null || playerName.isBlank()) {
+            throw new IllegalArgumentException("Player name cannot be empty.");
+        }
+
         board = new Board();
         board.initialize();
 
@@ -23,12 +27,16 @@ public class GameModel {
         decideStartingPlayer(startMode);
 
         gameState = GameState.IN_PROGRESS;
-        phase = Phase.SELECT_FROM;
+        phase = (currentPlayer == human) ? Phase.SELECT_FROM : Phase.COMPUTER_TURN;
         turnCount = 0;
         startMillis = System.currentTimeMillis();
     }
 
     private void decideStartingPlayer(StartMode startMode) {
+        if (startMode == null) {
+            throw new IllegalArgumentException("Start mode cannot be null.");
+        }
+
         if (startMode == StartMode.PLAYER_STARTS) {
             currentPlayer = human;
         } else if (startMode == StartMode.COMPUTER_STARTS) {
@@ -43,8 +51,12 @@ public class GameModel {
     }
 
     public void applyMove(Move move) {
+        if (move == null) {
+            throw new IllegalArgumentException("Move cannot be null.");
+        }
+
         if (!Rules.isValidMove(board, move)) {
-            throw new IllegalArgumentException("Invalid move");
+            throw new IllegalArgumentException("Invalid move.");
         }
 
         board.executeMove(move);
@@ -73,6 +85,14 @@ public class GameModel {
 
     public Board getBoard() {
         return board;
+    }
+
+    public Player getHuman() {
+        return human;
+    }
+
+    public Player getComputer() {
+        return computer;
     }
 
     public Player getCurrentPlayer() {

@@ -1,6 +1,5 @@
 package javaFx.Sarena.views.startchoice;
 
-import javaFx.Sarena.model.StartMode;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
@@ -11,7 +10,6 @@ import javafx.scene.layout.AnchorPane;
 public class StartChoiceView extends AnchorPane {
 
     private ImageView background;
-
     private ToggleGroup group;
     private RadioButton rbPlayer;
     private RadioButton rbComputer;
@@ -99,17 +97,7 @@ public class StartChoiceView extends AnchorPane {
 
     public Button getBackButton() { return backButton; }
     public Button getContinueButton() { return continueButton; }
-
-    public StartMode getSelectedStartMode() {
-        if (rbPlayer.isSelected()) {
-            return StartMode.PLAYER_STARTS;
-        } else if (rbComputer.isSelected()) {
-            return StartMode.COMPUTER_STARTS;
-        } else if (rbRandom.isSelected()) {
-            return StartMode.RANDOM;
-        }
-
-        return null;
-    }
-
+    public RadioButton getRbPlayer() {return rbPlayer;}
+    public RadioButton getRbComputer() {return rbComputer;}
+    public RadioButton getRbRandom() {return rbRandom;}
 }

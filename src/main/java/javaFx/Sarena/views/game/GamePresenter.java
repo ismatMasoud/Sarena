@@ -8,143 +8,118 @@ import javaFx.Sarena.model.Cell;
 import javaFx.Sarena.model.GameModel;
 import javaFx.Sarena.model.GameState;
 import javaFx.Sarena.model.Move;
-import javaFx.Sarena.model.PieceColor;
+import javaFx.Sarena.model.PlayerType;
 import javaFx.Sarena.model.StartMode;
 import javaFx.Sarena.model.Tower;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.animation.PauseTransition;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
-/*
- * GamePresenter verbindt GameView met GameModel.
- *
- * Deze klasse:
- * - start een nieuwe game
- * - reageert op kliks op het bord
- * - maakt moves
- * - laat de computer spelen
- * - ververst de view
- */
 public class GamePresenter {
+
+    private static final int BOARD_SIZE = 36;
+    private static final double COMPUTER_DELAY_SECONDS = 1.0;
 
     private final GameView view;
     private final Stage stage;
     private final GameModel model;
+    private final Random random;
 
-    // bewaart de eerste klik van de speler
     private Integer selectedFromIndex;
 
     public GamePresenter(GameView view, Stage stage, String playerName, StartMode startMode) {
         this.view = view;
         this.stage = stage;
         this.model = new GameModel();
+        this.random = new Random();
 
-        // start het spel in het model
         model.startNewGame(playerName, startMode);
-
-        // nog geen startcel geselecteerd
         selectedFromIndex = null;
 
         addEventHandlers();
         refreshView();
 
-        // Als computer start, laat hem meteen spelen
-        if (model.getCurrentPlayer().getType().name().equals("COMPUTER")) {
-            performComputerMove();
+        if (isComputerTurn()) {
+            performComputerMoveWithDelay();
         }
     }
 
     private void addEventHandlers() {
-
-        // Event handlers voor alle 36 cell-buttons
         Button[] buttons = view.getCellButtons();
 
         for (int i = 0; i < buttons.length; i++) {
             final int index = i;
-
-            buttons[i].setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent actionEvent) {
-                    handleCellClick(index);
-                }
-            });
+            buttons[i].setOnAction(event -> handleCellClick(index));
         }
 
-        // Exit knop
-        view.getBtnExit().setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                stage.close();
-            }
-        });
+        view.getBtnExit().setOnAction(event -> stage.close());
     }
 
-    /*
-     * Verwerkt klik op een cell.
-     *
-     * 1e klik = startcel kiezen
-     * 2e klik = doelcel kiezen en move uitvoeren
-     */
-    private void handleCellClick(int clickedIndex) {
+    private boolean isComputerTurn() {
+        return model.getCurrentPlayer().getType() == PlayerType.COMPUTER;
+    }
 
-        // Als game over is, niets meer doen
+    private void handleCellClick(int clickedIndex) {
         if (model.isGameOver()) {
             view.getLblMessage().setText("Game is over.");
+            refreshLabels();
             return;
         }
 
-        // Als computer aan beurt is, mag speler niet klikken
-        if (model.getCurrentPlayer().getType().name().equals("COMPUTER")) {
+        if (isComputerTurn()) {
             view.getLblMessage().setText("Computer is thinking...");
+            refreshLabels();
             return;
         }
 
-        // Eerste klik: kies startcel
         if (selectedFromIndex == null) {
             selectedFromIndex = clickedIndex;
-            view.getLblMessage().setText("Start cell selected: " + clickedIndex + ". Now choose destination.");
+            view.getLblMessage().setText("Start cell selected. Now choose destination.");
+            refreshLabels();
             return;
         }
 
-        // Tweede klik: maak move
         int fromIndex = selectedFromIndex;
         int toIndex = clickedIndex;
-
         Move move = new Move(fromIndex, toIndex);
 
         try {
             model.applyMove(move);
-
-            // reset selectie
             selectedFromIndex = null;
 
             refreshView();
 
-            // check of speler net game over maakte
             if (model.getGameState() == GameState.GAME_OVER) {
                 view.getLblMessage().setText("Game over!");
+                refreshLabels();
                 return;
             }
 
-            // laat computer nu spelen
-            performComputerMove();
+            performComputerMoveWithDelay();
 
         } catch (IllegalArgumentException ex) {
             view.getLblMessage().setText("Invalid move. Try again.");
             selectedFromIndex = null;
+            refreshLabels();
         }
     }
 
-    /*
-     * Laat de computer een random geldige move uitvoeren.
-     */
-    private void performComputerMove() {
+    private void performComputerMoveWithDelay() {
+        if (!isComputerTurn()) {
+            return;
+        }
 
-        // Alleen doen als computer aan beurt is
-        if (!model.getCurrentPlayer().getType().name().equals("COMPUTER")) {
+        view.getLblMessage().setText("Computer is thinking...");
+        refreshLabels();
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(COMPUTER_DELAY_SECONDS));
+        pause.setOnFinished(event -> performComputerMove());
+        pause.play();
+    }
+
+    private void performComputerMove() {
+        if (!isComputerTurn()) {
             return;
         }
 
@@ -152,10 +127,10 @@ public class GamePresenter {
 
         if (validMoves.isEmpty()) {
             view.getLblMessage().setText("No valid moves for computer.");
+            refreshLabels();
             return;
         }
 
-        Random random = new Random();
         Move randomMove = validMoves.get(random.nextInt(validMoves.size()));
 
         try {
@@ -168,54 +143,35 @@ public class GamePresenter {
                 view.getLblMessage().setText("Your turn.");
             }
 
+            refreshLabels();
+
         } catch (IllegalArgumentException ex) {
             view.getLblMessage().setText("Computer made an invalid move.");
+            refreshLabels();
         }
     }
 
-    /*
-     * Vernieuwt alles wat zichtbaar is in de view.
-     */
     private void refreshView() {
         refreshLabels();
         refreshBoard();
     }
 
-    /*
-     * Update labels met info uit het model.
-     */
     private void refreshLabels() {
         view.getLblCurrentPlayer().setText("Current Player: " + model.getCurrentPlayer().getName());
         view.getLblTurnCount().setText("Turns: " + model.getTurnCount());
     }
 
-    /*
-     * Update de 36 buttons op basis van de inhoud van het bord.
-     *
-     * Voor nu tonen we gewoon tekst:
-     * - leeg = ""
-     * - niet leeg = bovenste kleur + hoogte
-     *
-     * Later kan je hier images gebruiken.
-     */
     private void refreshBoard() {
-
         Board board = model.getBoard();
 
-        for (int i = 0; i < 36; i++) {
-
+        for (int i = 0; i < BOARD_SIZE; i++) {
             Cell cell = board.getCell(i);
             Tower tower = cell.getTower();
 
             if (tower.isEmpty()) {
                 view.clearCell(i);
-            }
-            else {
-
-                PieceColor topColor =
-                        tower.getPieces().get(tower.getPieces().size() - 1);
-
-                view.showPiece(i, topColor, tower.height());
+            } else {
+                view.showTower(i, tower);
             }
         }
     }
