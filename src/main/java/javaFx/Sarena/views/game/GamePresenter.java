@@ -199,21 +199,23 @@ public class GamePresenter {
      * Later kan je hier images gebruiken.
      */
     private void refreshBoard() {
-        Board board = model.getBoard();
-        Button[] buttons = view.getCellButtons();
 
-        for (int i = 0; i < buttons.length; i++) {
+        Board board = model.getBoard();
+
+        for (int i = 0; i < 36; i++) {
+
             Cell cell = board.getCell(i);
             Tower tower = cell.getTower();
 
             if (tower.isEmpty()) {
-                buttons[i].setText("");
-            } else {
-                List<PieceColor> pieces = tower.getPieces();
-                PieceColor topColor = pieces.get(pieces.size() - 1);
+                view.clearCell(i);
+            }
+            else {
 
-                // voorbeeld: "RED(3)"
-                buttons[i].setText(topColor + "(" + tower.height() + ")");
+                PieceColor topColor =
+                        tower.getPieces().get(tower.getPieces().size() - 1);
+
+                view.showPiece(i, topColor, tower.height());
             }
         }
     }
